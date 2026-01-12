@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Add manual log</title>
+
+<!-- Bootstrap 5 (même version que activityLog) -->
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+  rel="stylesheet">
+
+<style>
+body { background-color: #f7f9fc; }
+
+.header-bar {
+  background-color: #e6effa;
+  padding: 10px 20px;
+  border-bottom: 2px solid #d2d9e5;
+}
+
+.section-title {
+  background-color: #e6effa;
+  padding: 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+.search-box {
+  background-color: white;
+  padding: 15px;
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.05);
+}
+
+.results-box { margin-top: 20px; }
+
+.table textarea.form-control {
+  min-height: 34px;
+  height: 34px;
+  resize: vertical;
+}
+</style>
+</head>
+
+<body>
+
+  <!-- TOP BAR -->
+  <div class="header-bar d-flex justify-content-between align-items-center">
+    <div>
+      <strong>Back Office</strong> — User:
+      <span class="badge bg-secondary">System Administrator</span>
+      &nbsp; Organization Unit: <strong>Root Organization</strong>
+    </div>
+    <div>
+      <button class="btn btn-primary btn-sm">USER GUIDE</button>
+      <button class="btn btn-primary btn-sm">PORTFOLIO MANAGEMENT</button>
+    </div>
+  </div>
+
+  <!-- NAVIGATION TABS -->
+  <ul class="nav nav-tabs mt-2 px-3">
+    <li class="nav-item"><a class="nav-link active" href="#">Activity Log</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Organization Units</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Access Management</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Firm Properties</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">Activity Management</a></li>
+  </ul>
+
+  <div class="container mt-4">
+
+    <!-- TITLE -->
+    <div class="section-title d-flex justify-content-between align-items-center">
+      <span>Add manual log</span>
+
+      <a class="btn btn-secondary btn-sm"
+         th:href="@{/{product}/{locale}/{firmId}/activity(
+            product=${product},
+            locale=${locale},
+            firmId=${firmId}
+         )}">
+        BACK TO LIST
+      </a>
+    </div>
+
+    <!-- FORM (legacy style: 1 row table + description) -->
+    <div class="search-box">
+      <form method="post"
+            th:action="@{/{product}/{locale}/{firmId}/activity/add(
+              product=${product},
+              locale=${locale},
+              firmId=${firmId}
+            )}"
+            th:object="${manualLog}">
+
+        <table class="table table-bordered mb-2">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 140px;">Activity Date</th>
+              <th style="width: 160px;">Importance Level</th>
+              <th style="width: 220px;">Activity Type</th>
+              <th style="width: 140px;">User ID</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <!-- Date (fixe, readonly) -->
+              <td>
+                <input type="date" class="form-control"
+                       th:field="*{activityDate}" readonly>
+              </td>
+
+              <!-- Importance (fixe, readonly) -->
+              <td>
+                <input type="text" class="form-control"
+                       th:field="*{importance}" readonly>
+              </td>
+
+              <!-- Activity Type (fixe, readonly) -->
+              <td>
+                <input type="text" class="form-control"
+                       th:field="*{activityType}" readonly>
+              </td>
+
+              <!-- User ID (fixe, readonly) -->
+              <td>
+                <input type="text" class="form-control"
+                       th:field="*{userId}" readonly>
+              </td>
+
+              <!-- Description (editable) -->
+              <!-- Description (editable EN + FR) -->
+<td>
+  <div class="mb-2">
+    <label class="form-label mb-1">English Description</label>
+    <textarea class="form-control"
+              th:field="*{englishDescription}"></textarea>
+  </div>
+
+  <div>
+    <label class="form-label mb-1">Description (Français)</label>
+    <textarea class="form-control"
+              th:field="*{frenchDescription}"></textarea>
+  </div>
+</td>
+
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary btn-sm">SAVE</button>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="results-box mt-4">
+      <div class="fw-bold">No manual logs</div>
+    </div>
+
+  </div>
+
+</body>
+</html>
