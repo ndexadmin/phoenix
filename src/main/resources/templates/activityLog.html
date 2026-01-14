@@ -1,201 +1,176 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title th:text="${title}">Activity Log</title>
+    <meta charset="UTF-8"/>
+    <title th:text="#{backdoor.Activity.Log}">Activity Log</title>
 
-<!-- Bootstrap 5 -->
-<link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-    rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-<style>
-body { background-color: #f7f9fc; }
-
-.header-bar {
-  background-color: #e6effa;
-  padding: 10px 20px;
-  border-bottom: 2px solid #d2d9e5;
-}
-
-.section-title {
-  background-color: #e6effa;
-  padding: 10px;
-  border-radius: 4px;
-  font-weight: bold;
-  margin-top: 20px;
-  margin-bottom: 15px;
-}
-
-.search-box {
-  background-color: white;
-  padding: 15px;
-  border-radius: 4px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.05);
-}
-
-.results-box { margin-top: 20px; }
-
-/* (même CSS exact que activityAdd.html – ne change rien ici, mais tu voulais identique) */
-.table textarea.form-control {
-  min-height: 34px;
-  height: 34px;
-  resize: vertical;
-}
-</style>
+    <style>
+        body { background-color:#f7f9fc; }
+        .header-bar { background:#e6effa; padding:10px 20px; border-bottom:2px solid #d2d9e5; }
+        .section-title { background:#e6effa; padding:10px; border-radius:4px; font-weight:bold; margin:20px 0 15px; }
+        .search-box { background:#fff; padding:15px; border-radius:4px; box-shadow:0 0 5px rgba(0,0,0,.05); }
+        .results-box { margin-top:20px; }
+        .table textarea.form-control { min-height:34px; height:34px; resize:vertical; }
+    </style>
 </head>
 
 <body>
 
-    <!-- TOP BAR -->
-    <div class="header-bar d-flex justify-content-between align-items-center">
-        <div>
-            <strong>Back Office</strong> — User:
-            <span class="badge bg-secondary">System Administrator</span>
-            &nbsp; Organization Unit: <strong>Root Organization</strong>
-        </div>
-        <div>
-            <button class="btn btn-primary btn-sm">USER GUIDE</button>
-            <button class="btn btn-primary btn-sm">PORTFOLIO MANAGEMENT</button>
-        </div>
+<!-- TOP BAR -->
+<div class="header-bar d-flex justify-content-between align-items-center">
+    <div>
+        <strong th:text="#{backdoor.common.back.office}">Back Office</strong>
+        — <span th:text="#{backdoor.common.user.label}">User</span>:
+        <span class="badge bg-secondary" th:text="${username} ?: 'System Administrator'">System Administrator</span>
+        &nbsp; <span th:text="#{backdoor.common.orgunit.label}">Organization Unit</span>:
+        <strong th:text="${orgUnitName} ?: 'Root Organization'">Root Organization</strong>
+    </div>
+    <div class="d-flex gap-2">
+        <!-- Sélecteur de langue -->
+        <!-- Langue (affichage uniquement) -->
+        <span class="badge rounded-pill bg-light border d-flex align-items-center gap-2"
+              title="Language"
+              style="pointer-events:none; user-select:none;">
+              <i class="bi bi-translate"></i>
+                        <!-- EN -->
+              <span th:classappend="${#strings.toUpperCase(locale)} == 'EN' ? 'text-primary fw-semibold' : 'text-muted'">
+                EN
+              </span>
+              <span>/</span>
+                        <!-- FR -->
+              <span th:classappend="${#strings.toUpperCase(locale)} == 'FR' ? 'text-primary fw-semibold' : 'text-muted'">
+                FR
+              </span>
+        </span>
+
+        <button class="btn btn-primary btn-sm" th:text="#{backdoor.common.user.guide}">USER GUIDE</button>
+        <button class="btn btn-primary btn-sm" th:text="#{backdoor.common.portfolio.management}">PORTFOLIO MANAGEMENT</button>
+        <button type="submit" class="btn btn-danger btn-sm" th:text="#{backdoor.common.logout}">Logout</button>
+    </div>
+</div>
+
+<!-- NAVIGATION TABS -->
+<ul class="nav nav-tabs mt-2 px-3">
+    <li class="nav-item"><a class="nav-link active" th:text="#{backdoor.Activity.Log}" href="#"></a></li>
+    <li class="nav-item"><a class="nav-link" th:text="#{backdoor.Organization.Units}" href="#"></a></li>
+    <li class="nav-item"><a class="nav-link" th:text="#{backdoor.Access.Management}" href="#"></a></li>
+    <li class="nav-item"><a class="nav-link" th:text="#{backdoor.Firm.Properties}" href="#"></a></li>
+    <li class="nav-item"><a class="nav-link" th:text="#{backdoor.Activity.Management}" href="#"></a></li>
+    <!-- Other Functions à droite -->
+    <li class="nav-item">
+            <button class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                <span th:text="#{backdoor.Other.Functions}">Other functions</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#">Audit export</a></li>
+                <li><a class="dropdown-item" href="#">KPI dashboard</a></li>
+                <li><a class="dropdown-item" href="#">System status</a></li>
+            </ul>
+    </li>
+</ul>
+
+<div class="container mt-4">
+
+    <!-- SEARCH TITLE -->
+    <div class="section-title" th:text="#{backdoor.Activity.Search}">Activity Search</div>
+
+    <!-- SEARCH FORM -->
+    <div class="search-box">
+        <form method="post"
+              th:action="@{/{product}/{locale}/{firmId}/activity/search(product=${product},locale=${locale},firmId=${firmId})}"
+              th:object="${searchView}"
+              class="row g-3">
+
+            <div class="col-md-3">
+                <label class="form-label" th:text="#{backdoor.Activity.Type}">Activity Type</label>
+                <select class="form-select" th:field="*{category}">
+                    <option th:each="entry : ${categories}" th:value="${entry.key}" th:text="${entry.value}"></option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label" th:text="#{backdoor.Importance.Level}">Importance Level</label>
+                <select class="form-select" th:field="*{importance}">
+                    <option th:each="entry : ${importances}" th:value="${entry.key}" th:text="${entry.value}"></option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" th:text="#{backdoor.User.ID}">User ID</label>
+                <input class="form-control" type="text" th:field="*{userId}">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" th:text="#{backdoor.From}">From</label>
+                <input class="form-control" type="date" th:field="*{fromDate}">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label" th:text="#{backdoor.To}">To</label>
+                <input class="form-control" type="date" th:field="*{toDate}">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label" th:text="#{backdoor.Search.in.Description}">Search in Description</label>
+                <input type="text" class="form-control" th:field="*{searchDescription}">
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <div class="form-check me-3">
+                    <input class="form-check-input" type="radio" th:field="*{searchCriteria}" value="BEGINSWITH">
+                    <label class="form-check-label" th:text="#{backdoor.Begins.with}">Begins with</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" th:field="*{searchCriteria}" value="CONTAINS" checked>
+                    <label class="form-check-label" th:text="#{backdoor.Contains}">Contains</label>
+                </div>
+            </div>
+
+            <div class="col-12 text-end">
+                <a class="btn btn-secondary btn-sm"
+                   th:href="@{/{product}/{locale}/{firmId}/activity/add(product=${product},locale=${locale},firmId=${firmId})}"
+                   th:text="#{backdoor.add.manual.log}">Add manual log</a>
+                <button type="submit" class="btn btn-primary btn-sm" th:text="#{backdoor.Search}">Search</button>
+            </div>
+        </form>
     </div>
 
-    <!-- NAVIGATION TABS -->
-    <ul class="nav nav-tabs mt-2 px-3">
-        <li class="nav-item"><a class="nav-link active" href="#">Activity Log</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Organization Units</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Access Management</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Firm Properties</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Activity Management</a></li>
-    </ul>
-
-    <div class="container mt-4">
-
-        <!-- SEARCH TITLE -->
-        <div class="section-title">Activity Search</div>
-
-        <!-- SEARCH FORM -->
-        <div class="search-box">
-            <form method="post"
-                  th:action="@{/{product}/{locale}/{firmId}/activity/search(
-                      product=${product},
-                      locale=${locale},
-                      firmId=${firmId}
-                  )}"
-                  th:object="${searchView}"
-                  class="row g-3">
-
-                <!-- CATEGORY -->
-                <div class="col-md-3">
-                    <label class="form-label">Activity Type</label>
-                    <select class="form-select" th:field="*{category}">
-                        <option th:each="entry : ${categories}"
-                                th:value="${entry.key}"
-                                th:text="${entry.value}"></option>
-                    </select>
-                </div>
-
-                <!-- IMPORTANCE -->
-                <div class="col-md-3">
-                    <label class="form-label">Importance Level</label>
-                    <select class="form-select" th:field="*{importance}">
-                        <option th:each="entry : ${importances}"
-                                th:value="${entry.key}"
-                                th:text="${entry.value}"></option>
-                    </select>
-                </div>
-
-                <!-- USER ID -->
-                <div class="col-md-2">
-                    <label class="form-label">User ID</label>
-                    <input class="form-control" type="text" th:field="*{userId}">
-                </div>
-
-                <!-- FROM DATE -->
-                <div class="col-md-2">
-                    <label class="form-label">From</label>
-                    <input class="form-control" type="date" th:field="*{fromDate}">
-                </div>
-
-                <!-- TO DATE -->
-                <div class="col-md-2">
-                    <label class="form-label">To</label>
-                    <input class="form-control" type="date" th:field="*{toDate}">
-                </div>
-
-                <!-- DESCRIPTION -->
-                <div class="col-md-4">
-                    <label class="form-label">Search in Description</label>
-                    <input type="text" class="form-control" th:field="*{searchDescription}">
-                </div>
-
-                <!-- SEARCH MODE -->
-                <div class="col-md-3 d-flex align-items-end">
-                    <div class="form-check me-3">
-                        <input class="form-check-input" type="radio"
-                               th:field="*{searchCriteria}" value="BEGINSWITH">
-                        <label class="form-check-label">Begins with</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio"
-                               th:field="*{searchCriteria}" value="CONTAINS" checked>
-                        <label class="form-check-label">Contains</label>
-                    </div>
-                </div>
-
-                <!-- BUTTONS -->
-                <div class="col-12 text-end">
-                    <a class="btn btn-secondary btn-sm"
-                       th:href="@{/{product}/{locale}/{firmId}/activity/add(
-                           product=${product},
-                           locale=${locale},
-                           firmId=${firmId}
-                       )}">
-                        Add New Entry
-                    </a>
-                    <button type="submit" class="btn btn-primary btn-sm">Search</button>
-                </div>
-
-            </form>
-        </div>
-
-        <!-- RESULTS -->
-        <div class="section-title">
-            Search Results
-            <button class="btn btn-success btn-sm float-end">EXPORT</button>
-        </div>
-
-        <div class="results-box">
-            <table class="table table-bordered table-striped">
-                <thead class="table-light">
-                    <tr>
-                        <th>Activity Date</th>
-                        <th>Importance Level</th>
-                        <th>Activity Type</th>
-                        <th>User ID</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr th:each="item : ${auditItems}">
-                        <td th:text="${#temporals.format(item.nDate, 'yyyy/MM/dd - HH:mm:ss')}"></td>
-                        <td th:text="${item.importance}"></td>
-                        <td th:text="${item.category}"></td>
-                        <td th:text="${item.userId}"></td>
-                        <td th:text="${item.description}"></td>
-                    </tr>
-
-                    <tr th:if="${#lists.isEmpty(auditItems)}">
-                        <td colspan="5" class="text-center text-muted">
-                            No activity found for the selected criteria
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
+    <div class="section-title">
+        <span th:text="#{backdoor.Search.Results}">Search Results</span>
+        <button class="btn btn-success btn-sm float-end" th:text="#{export.label}">EXPORT</button>
     </div>
 
+    <div class="results-box">
+        <table class="table table-bordered table-striped">
+            <thead class="table-light">
+            <tr>
+                <th th:text="#{backdoor.Activity.Date}">Activity Date</th>
+                <th th:text="#{backdoor.Importance.Level}">Importance Level</th>
+                <th th:text="#{backdoor.Activity.Type}">Activity Type</th>
+                <th th:text="#{backdoor.User.ID}">User ID</th>
+                <th th:text="#{backdoor.Description}">Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${auditItems}">
+                <td th:text="${#temporals.format(item.nDate, 'yyyy/MM/dd - HH:mm:ss')}"></td>
+                <td th:text="${item.importance}"></td>
+                <td th:text="${item.category}"></td>
+                <td th:text="${item.userId}"></td>
+                <td th:text="${item.description}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(auditItems)}">
+                <td colspan="5" class="text-center text-muted" th:text="#{backdoor.NoActivityFound}">
+                    No activity found for the selected criteria
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
 </body>
 </html>
