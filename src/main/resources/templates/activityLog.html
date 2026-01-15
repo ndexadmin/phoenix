@@ -77,10 +77,9 @@ body { background-color: #f7f9fc; }
         <!-- SEARCH FORM -->
         <div class="search-box">
             <form method="post"
-                  th:action="@{/{product}/{locale}/{firmId}/activity/search(
+                  th:action="@{/{product}/{locale}/activity/search(
                       product=${product},
-                      locale=${locale},
-                      firmId=${firmId}
+                      locale=${locale}
                   )}"
                   th:object="${searchView}"
                   class="row g-3">
@@ -146,10 +145,9 @@ body { background-color: #f7f9fc; }
                 <!-- BUTTONS -->
                 <div class="col-12 text-end">
                     <a class="btn btn-secondary btn-sm"
-                       th:href="@{/{product}/{locale}/{firmId}/activity/add(
+                       th:href="@{/{product}/{locale}/activity/add(
                            product=${product},
-                           locale=${locale},
-                           firmId=${firmId}
+                           locale=${locale}
                        )}">
                         Add New Entry
                     </a>

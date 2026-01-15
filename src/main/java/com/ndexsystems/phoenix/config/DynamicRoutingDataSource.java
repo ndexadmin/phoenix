@@ -29,7 +29,7 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
         String tenant = TenantContext.getTenant();
 
         if (tenant == null) {
-            throw new IllegalStateException("Aucun tenant défini !");
+        	tenant = dbProps.getDefaultDb();
         }
 
       

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ndexsystems.phoenix.AbstractTenantJpaTestSupport;
 import com.ndexsystems.phoenix.entities.AuditItem;
 import com.ndexsystems.phoenix.entities.AuditItemSpRow;
+import org.springframework.beans.factory.annotation.Value;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -27,7 +28,8 @@ class AuditItemRepositoryTest extends AbstractTenantJpaTestSupport {
 	@Autowired
 	private AuditItemSpRowRepository auditItemSpRowRepository;
 
-	private static final String ORG_UNIT_ID = "21";
+	 @Value("${phoenix.test.org-unit-id}")
+	private String orgUnitId;
 	private static final Integer CURSOR_START = 1;
 	private static final Integer RANGE = 200;
 
@@ -51,7 +53,7 @@ class AuditItemRepositoryTest extends AbstractTenantJpaTestSupport {
 	@Transactional
 	@Test
 	void sp_findByImportanceTest() {
-		List<AuditItemSpRow> results = auditItemSpRowRepository.findByImportance(CURSOR_START, RANGE, ORG_UNIT_ID,
+		List<AuditItemSpRow> results = auditItemSpRowRepository.findByImportance(CURSOR_START, RANGE, orgUnitId,
 				selUserId, selCategoryAny, selImportanceAny, startDate, endDate, null, null, "en");
 
 		assertThat(results).isNotNull();

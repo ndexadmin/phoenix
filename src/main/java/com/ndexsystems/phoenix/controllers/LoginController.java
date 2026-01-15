@@ -15,8 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ndexsystems.phoenix.services.AuthenticationService;
-import com.ndexsystems.phoenix.util.AuthUserContext;
+import com.ndexsystems.phoenix.views.ContextView;
 import com.ndexsystems.phoenix.views.LoginView;
+import com.ndexsystems.phoenix.views.OrganizationUnitView;
 import com.ndexsystems.phoenix.views.UserView;
 
 import jakarta.servlet.http.HttpSession;
@@ -46,8 +47,12 @@ public class LoginController {
 			@PathVariable String locale, @PathVariable String firmId, @RequestBody LoginView loginForm) {
 
 		UserView userView = authenticationService.authenticate(loginForm.loginId(), loginForm.password(), product);
-		session.setAttribute("USER_CONTEXT", userView);
-		AuthUserContext.set(userView);
+		OrganizationUnitView organizationUnitView =
+	            authenticationService.findOrganizationUnitByUnitKey(
+	                    userView.getOrganizationUnitKey()
+	            );
+
+	    session.setAttribute("CONTEXT", new ContextView(userView, organizationUnitView));
 		Map<String, Object> resp = new HashMap<>();
 		resp.put("authenticated", true);
 		resp.put("userId", loginForm.loginId());

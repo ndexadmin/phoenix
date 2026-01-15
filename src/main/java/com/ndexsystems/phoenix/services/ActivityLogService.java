@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
 
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -195,7 +194,7 @@ public class ActivityLogService {
 	    item.setInstitution_Key(user.getOrganizationUnitKey());
 	    item.setStemLog_Key(null);
 
-	    item.setCategory("ACSF");
+	    item.setCategory(manualLog.getActivityType());
 	    item.setImportance("0");
 
 	    item.setNDate(date);

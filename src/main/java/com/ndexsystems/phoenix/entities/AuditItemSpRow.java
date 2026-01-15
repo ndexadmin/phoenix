@@ -31,7 +31,7 @@ import lombok.Data;
 
     @NamedStoredProcedureQuery(
         name = "AuditItemSpRow.byDescDate",
-        procedureName = "gicapitalcorp.sp_AuditItemByDescDate",
+        procedureName = "sp_AuditItemByDescDate",
         resultClasses = AuditItemSpRow.class,
         parameters = {
             @StoredProcedureParameter(mode = ParameterMode.IN, name = "v_h_cursorStart", type = Integer.class),

@@ -17,7 +17,7 @@ import com.ndexsystems.phoenix.views.AuditItemView;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
 public abstract class AuditItemMapperEntityToView {
 
-	@Mapping(target = "nDate", expression = "java(entity.getNDate())")
+
 	@Mapping(target = "category", expression = "java(resolveCategory(entity.getCategory()))")
 	@Mapping(target = "userId", expression = "java(entity.getUserId())")
 	@Mapping(target = "description", expression = "java(resolveDescription(entity, locale))")

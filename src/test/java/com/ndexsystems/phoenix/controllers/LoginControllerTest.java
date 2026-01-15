@@ -27,7 +27,7 @@ class LoginControllerTest {
         }
         """;
 
-        mockMvc.perform(post("/fullservice/fr/gicapitalcorp/login")
+        mockMvc.perform(post("/fullservice/fr/capstoneinvestmentgroup/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk());
@@ -43,7 +43,7 @@ class LoginControllerTest {
         }
         """;
 
-        mockMvc.perform(post("/fullservice/en/gicapitalcorp/login")
+        mockMvc.perform(post("/fullservice/en/capstoneinvestmentgroup/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk());

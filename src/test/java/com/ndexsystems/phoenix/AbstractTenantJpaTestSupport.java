@@ -11,7 +11,7 @@ import com.ndexsystems.phoenix.config.TenantContext;
 @ActiveProfiles("test")
 public abstract class AbstractTenantJpaTestSupport {
 
-	protected static final String FIRM_ID = "gicapitalcorp";
+	protected static final String FIRM_ID = "capstoneinvestmentgroup";
 
 	@BeforeTransaction
 	void setTenantBeforeTx() {

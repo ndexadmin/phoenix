@@ -5,7 +5,7 @@ public final class Constants {
 	private Constants() {
 	}
 
-	public static final String DEFAULT_TENANT = "gicapitalcorp";
+	public static final String DEFAULT_TENANT = "capstoneinvestmentgroup";
 	public static final String CA = "CA";
 	
 	public static final String PRODUCT_FULLSERVICE = "fullservice";

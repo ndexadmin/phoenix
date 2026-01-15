@@ -1,15 +1,21 @@
 package com.ndexsystems.phoenix.services;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ndexsystems.phoenix.dto.UserDTO;
+import com.ndexsystems.phoenix.entities.OrganizationUnit;
 import com.ndexsystems.phoenix.entities.User;
+import com.ndexsystems.phoenix.mapper.OrganizationUnitMapperEntityToView;
 import com.ndexsystems.phoenix.mapper.UserMapperDTOToView;
 import com.ndexsystems.phoenix.mapper.UserMapperEntityToDTO;
+import com.ndexsystems.phoenix.repositories.OrganizationUnitRepository;
 import com.ndexsystems.phoenix.repositories.UserRepository;
 import com.ndexsystems.phoenix.services.security.PasswordValidator;
 import com.ndexsystems.phoenix.services.security.ProductAccessService;
+import com.ndexsystems.phoenix.views.OrganizationUnitView;
 import com.ndexsystems.phoenix.views.UserView;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +28,8 @@ public class AuthenticationService {
 	private final PasswordValidator passwordValidator;
 	private final UserMapperEntityToDTO mapperEntityToDTO;
 	private final UserMapperDTOToView mapperDTOToView;
+	private final OrganizationUnitRepository organizationUnitRepository;
+	private final OrganizationUnitMapperEntityToView organizationUnitMapper;
 
 	@Transactional
 	public UserView authenticate(String loginId, String password, String product) {
@@ -45,4 +53,13 @@ public class AuthenticationService {
 		}
 		return mapperDTOToView.toView(userDTO);
 	}
+
+	@Transactional(readOnly = true)
+	public OrganizationUnitView findOrganizationUnitByUnitKey(BigDecimal organizationUnitKey) {
+	    return organizationUnitRepository.findById(organizationUnitKey)
+	            .map(organizationUnitMapper::toView)
+	            .orElse(null);
+	}
+
+
 }

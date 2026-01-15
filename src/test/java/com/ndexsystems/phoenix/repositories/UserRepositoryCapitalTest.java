@@ -23,7 +23,7 @@ class UserRepositoryCapitalTest extends AbstractTenantJpaTestSupport  {
 	@Test
 	void testUserTableLoginId() {
 
-		TenantContext.setTenant("gicapitalcorp");
+		TenantContext.setTenant("capstoneinvestmentgroup");
 		String loginId = "sysadmin";
 		
 			

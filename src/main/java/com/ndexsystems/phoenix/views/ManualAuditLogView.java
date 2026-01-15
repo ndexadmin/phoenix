@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class ManualAuditLogView {
-
 	private String activityDate;
 	private String importance;
 	private String activityType;

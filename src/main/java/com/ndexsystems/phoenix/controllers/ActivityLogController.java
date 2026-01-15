@@ -13,32 +13,37 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.ndexsystems.phoenix.config.TenantContext;
 import com.ndexsystems.phoenix.services.ActivityLogService;
 import com.ndexsystems.phoenix.util.Constants;
 import com.ndexsystems.phoenix.util.Utils;
 import com.ndexsystems.phoenix.views.ActivitySearchView;
+import com.ndexsystems.phoenix.views.ContextView;
 import com.ndexsystems.phoenix.views.ManualAuditLogView;
+import com.ndexsystems.phoenix.views.OrganizationUnitView;
 import com.ndexsystems.phoenix.views.UserView;
 
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/{product}/{locale}/{firmId}")
-@RequiredArgsConstructor
-public class ActivityLogController {
+@RequestMapping("/{product}/{locale}")
+public class ActivityLogController extends BaseController {
 
 	private final ActivityLogService activityLogService;
-	private final HttpSession session;
-	private final MessageSource messageSource;
+
+    public ActivityLogController(ActivityLogService activityLogService,
+                                 HttpSession session,
+                                 MessageSource messageSource) {
+        super(session, messageSource);
+        this.activityLogService = activityLogService;
+    }
 
 	@GetMapping("/activity")
-	public String showActivity(@PathVariable String product, @PathVariable String locale, @PathVariable String firmId,
+	public String showActivity(@PathVariable String product, @PathVariable String locale,
 			Model model) {
-		UserView user = (UserView) session.getAttribute("USER_CONTEXT");
-		if (user == null) {
-			return "redirect:/" + product + "/" + locale + "/" + firmId + "/login";
-		}
+		ContextView ctx = requireContext(product, locale);
+	    UserView user = ctx.getUser();
+		OrganizationUnitView orgUnit = ctx.getOrganizationUnit();
 
 		ManualAuditLogView manualLog = new ManualAuditLogView();
 		manualLog.setActivityDate(LocalDate.now().toString());
@@ -58,10 +63,10 @@ public class ActivityLogController {
 		activityLogService.addManualAuditItem(user, manualLog);
 
 		model.addAttribute("title", "Activity Log");
-		model.addAttribute("categories", activityLogService.setUpCategories("sysadmin", firmId));
+		model.addAttribute("categories", activityLogService.setUpCategories("sysadmin", TenantContext.getTenant()));
 		model.addAttribute("importances", activityLogService.setUpImportance());
 		model.addAttribute("auditItems",
-				activityLogService.lookupAuditTrailView("21", "%", "%", "%", LocalDate.now().atStartOfDay(),
+				activityLogService.lookupAuditTrailView(String.valueOf(orgUnit.getOrganizationUnitKey()), "%", "%", "%", LocalDate.now().atStartOfDay(),
 						LocalDate.now().atTime(23, 59, 59), Constants.PAGE1, Constants.MAX_PAGE, null, null, locale));
 		model.addAttribute("searchView", new ActivitySearchView());
 
@@ -69,15 +74,13 @@ public class ActivityLogController {
 	}
 
 	@PostMapping("/activity/search")
-	public String searchActivities(@PathVariable String product, @PathVariable String locale,
-			@PathVariable String firmId, @ModelAttribute("searchView") ActivitySearchView searchView, Model model) {
+	public String searchActivities(@PathVariable String product, @PathVariable String locale, @ModelAttribute("searchView") ActivitySearchView searchView, Model model) {
 
-		UserView user = (UserView) session.getAttribute("USER_CONTEXT");
-		if (user == null) {
-			return "redirect:/" + product + "/" + locale + "/" + firmId + "/login";
-		}
+		ContextView ctx = requireContext(product, locale);
+		
+			OrganizationUnitView orgUnit = ctx.getOrganizationUnit();
 
-		prepareCommonModel(model, locale, firmId);
+		prepareCommonModel(model, locale);
 
 		LocalDateTime startDate = searchView.getFromDate() != null ? searchView.getFromDate().atStartOfDay()
 				: LocalDateTime.of(1753, 1, 1, 0, 0, 0);
@@ -88,7 +91,7 @@ public class ActivityLogController {
 		searchView.setCategory(searchView.getCategory().replace("All", "%"));
 		searchView.setImportance(searchView.getImportance().replace("All", "%"));
 		model.addAttribute("auditItems",
-				activityLogService.seachAuditTrailView("21", Utils.orWildcard(searchView.getUserId()),
+				activityLogService.seachAuditTrailView(String.valueOf(orgUnit.getOrganizationUnitKey()), Utils.orWildcard(searchView.getUserId()),
 						searchView.getCategory(), searchView.getImportance(), startDate, endDate, Constants.PAGE1,
 						Constants.MAX_PAGE, searchView.getSearchDescription(), searchView.getSearchCriteria(), locale));
 
@@ -97,21 +100,19 @@ public class ActivityLogController {
 		return "activityLog";
 	}
 
-	private void prepareCommonModel(Model model, String locale, String firmId) {
+	private void prepareCommonModel(Model model, String locale) {
 		model.addAttribute("title", "Activity Log");
-		model.addAttribute("categories", activityLogService.setUpCategories("sysadmin", firmId));
+		model.addAttribute("categories", activityLogService.setUpCategories("sysadmin", TenantContext.getTenant()));
 		model.addAttribute("importances", activityLogService.setUpImportance());
 	}
 
 	@GetMapping("/activity/add")
-	public String showAddManualLog(@PathVariable String product, @PathVariable String locale,
-			@PathVariable String firmId, Model model) {
+	public String showAddManualLog(@PathVariable String product, @PathVariable String locale, @ModelAttribute("searchView") ActivitySearchView searchView, Model model) {
 
-		UserView user = (UserView) session.getAttribute("USER_CONTEXT");
-		if (user == null) {
-			return "redirect:/" + product + "/" + locale + "/" + firmId + "/login";
-		}
-
+		ContextView ctx = requireContext(product, locale);
+	    UserView user = ctx.getUser();
+		OrganizationUnitView orgUnit = ctx.getOrganizationUnit();
+		
 		ManualAuditLogView manualLog = new ManualAuditLogView();
 		manualLog.setActivityDate(LocalDate.now().toString());
 		manualLog.setImportance("Information");
@@ -120,7 +121,14 @@ public class ActivityLogController {
 		manualLog.setEnglishDescription("");
 		manualLog.setFrenchDescription("");
 		model.addAttribute("manualLog", manualLog);
+		
 
+	
+		model.addAttribute("manualAuditItems", activityLogService.seachAuditTrailView(String.valueOf(orgUnit.getOrganizationUnitKey()), user.getLoginId(),
+				"14", "0", LocalDate.now().atStartOfDay(), LocalDate.now().atTime(23, 59, 59), Constants.PAGE1,
+				Constants.MAX_PAGE, null,null, null));
+
+		model.addAttribute("searchView", searchView);
 		return "activityAdd";
-	}
+		}
 }

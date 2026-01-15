@@ -1,8 +1,8 @@
 package com.ndexsystems.phoenix.entities;
+import java.math.BigDecimal;
+
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.math.BigDecimal;
 
 @Data
 @Entity
@@ -10,27 +10,37 @@ import java.math.BigDecimal;
 public class OrganizationUnit {
 
     @Id
-    private BigDecimal OBJECT_ID;
+    @Column(name = "OBJECT_ID")
+    private BigDecimal objectId;
 
-    private BigDecimal OBJECT_TIMESTAMP;
+    @Column(name = "OBJECT_TIMESTAMP", nullable = false)
+    private BigDecimal objectTimestamp;
 
-    private Integer OBJECT_COUNTER;
+    @Column(name = "OBJECT_COUNTER", nullable = false)
+    private Integer objectCounter;
 
-    private BigDecimal OrganizationUnit_Key;
+    // FK vers le parent
+    @Column(name = "OrganizationUnit_Key")
+    private BigDecimal organizationUnitKey;
 
+    @Column(name = "id")
     private String id;
 
+    @Column(name = "nName")
     private String nName;
 
+    @Column(name = "onlineInstitutionDiscl")
     private String onlineInstitutionDiscl;
 
-    private BigDecimal BatchTradeClearing_Key;
+    @Column(name = "BatchTradeClearing_Key")
+    private BigDecimal batchTradeClearingKey;
 
+    @Column(name = "numberOfAccountOpened")
     private Integer numberOfAccountOpened;
 
+    @Column(name = "propertyHolder")
     private String propertyHolder;
 
-   
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
         name = "OrganizationUnit_Key",
